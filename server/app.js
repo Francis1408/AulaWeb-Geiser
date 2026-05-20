@@ -1,15 +1,25 @@
 // importação de dependência(s)
+const express = require('express'),
+    app = express();
+
+const fs = require('fs');
+const path = require('path');
 
 
 // variáveis globais deste módulo
 const PORT = 3000
 const db = {}
 
+const JOGADORES_DATA_PATH = './data/jogadores.json'
+const JOGOS_DATA_PATH = './data/jogosPorJogador.json'
+
 
 // carregar "banco de dados" (data/jogadores.json e data/jogosPorJogador.json)
 // você pode colocar o conteúdo dos arquivos json no objeto "db" logo abaixo
 // dica: 1-4 linhas de código (você deve usar o módulo de filesystem (fs))
+// fs.readFile(JOGADORES_DATA_PATH, 'utf8', (err, data) => {
 
+// })
 
 
 
@@ -17,6 +27,9 @@ const db = {}
 //app.set('view engine', '???qual-templating-engine???');
 //app.set('views', '???caminho-ate-pasta???');
 // dica: 2 linhas
+// app.set('view engine', 'hbs');
+// app.set('views', `${__dirname}/client`)
+
 
 
 // EXERCÍCIO 2
@@ -37,7 +50,14 @@ const db = {}
 // EXERCÍCIO 1
 // configurar para servir os arquivos estáticos da pasta "client"
 // dica: 1 linha de código
-
+app.use(express.static(path.join(__dirname, '../client')));
 
 // abrir servidor na porta 3000 (constante PORT)
 // dica: 1-3 linhas de código
+app.listen(PORT, () => {
+    console.log('Escutando em: http://localhost:3000')
+})
+
+// app.get('/', (request, response) => {
+//     response.render('index');
+// })
