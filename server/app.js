@@ -1,10 +1,11 @@
+
 // importação de dependência(s)
 const express = require('express'),
     app = express();
 
 const fs = require('fs');
 const path = require('path');
-
+const _ = require('underscore');
 
 // variáveis globais deste módulo
 const PORT = 3000
@@ -21,6 +22,19 @@ fs.readFile(JOGADORES_DATA_PATH, 'utf8', (err, data) => {
     if (err) throw err;
     const parsedData = JSON.parse(data)
     db.players = parsedData.players
+
+    // Após isso, lê o jogos por jogador e adiciona no dict de cada jogador
+    fs.readFile(JOGOS_DATA_PATH, 'utf-8', (err, data) => {
+        if (err) throw err;
+        const parsedData = JSON.parse(data)
+
+        Object.keys(parsedData).forEach(key => {
+            const player = db.players.find(player => player.steamid === key);
+            if (player) {
+                player.jogos = parsedData[key];
+            }
+        })
+    })
    
 })
 
@@ -40,7 +54,6 @@ app.set('views', path.join(__dirname, 'views'))
 // dados do banco de dados "data/jogadores.json" com a lista de jogadores
 // dica: o handler desta função é bem simples - basta passar para o template
 //       os dados do arquivo data/jogadores.json (~3 linhas)
-
 app.get('/', (request, response) => {
     response.render('index', db);
 })
@@ -51,7 +64,35 @@ app.get('/', (request, response) => {
 // jogador, usando os dados do banco de dados "data/jogadores.json" e
 // "data/jogosPorJogador.json", assim como alguns campos calculados
 // dica: o handler desta função pode chegar a ter ~15 linhas de código
+// Itera o db para criar as rotas de cada jogador presente 
+app.get('/jogador/:numero_identificador/', (request, response) => {
 
+    const id = request.params.numero_identificador;
+
+    let profile = _.find(db.players, function(el) {return el.steamid === id});
+    let jogos = profile.jogos;
+
+    // Conta o numero de jogos nao jogados
+    jogos.not_played_count = _.where(jogos.games, {playtime_forever : 0}).length;
+    
+    // Ordena jogos por tempo jogado
+    jogos.games = _.sortBy(jogos.games, function(el) {
+        return -el.playtime_forever;
+    })
+
+    jogos.games = _.head(jogos.games, 5);
+
+    jogos.games = _.map(jogos.games, (el) => {
+        el.playtime_forever_h = Math.round(el.playtime_forever/60);
+        return el;
+    });
+
+    // Jogo favorito
+    jogos.favorite = jogos.games[0];
+
+    response.render('jogador', profile);
+
+})
 
 // EXERCÍCIO 1
 // configurar para servir os arquivos estáticos da pasta "client"
