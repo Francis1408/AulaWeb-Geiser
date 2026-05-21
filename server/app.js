@@ -10,16 +10,19 @@ const path = require('path');
 const PORT = 3000
 const db = {}
 
-const JOGADORES_DATA_PATH = './data/jogadores.json'
-const JOGOS_DATA_PATH = './data/jogosPorJogador.json'
+const JOGADORES_DATA_PATH = path.join(__dirname, 'data/jogadores.json');
+const JOGOS_DATA_PATH = path.join(__dirname, 'data/jogosPorJogador.json');
 
 
 // carregar "banco de dados" (data/jogadores.json e data/jogosPorJogador.json)
 // você pode colocar o conteúdo dos arquivos json no objeto "db" logo abaixo
 // dica: 1-4 linhas de código (você deve usar o módulo de filesystem (fs))
-// fs.readFile(JOGADORES_DATA_PATH, 'utf8', (err, data) => {
-
-// })
+fs.readFile(JOGADORES_DATA_PATH, 'utf8', (err, data) => {
+    if (err) throw err;
+    const parsedData = JSON.parse(data)
+    db.players = parsedData.players
+   
+})
 
 
 
@@ -27,8 +30,8 @@ const JOGOS_DATA_PATH = './data/jogosPorJogador.json'
 //app.set('view engine', '???qual-templating-engine???');
 //app.set('views', '???caminho-ate-pasta???');
 // dica: 2 linhas
-// app.set('view engine', 'hbs');
-// app.set('views', `${__dirname}/client`)
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'))
 
 
 
@@ -38,6 +41,9 @@ const JOGOS_DATA_PATH = './data/jogosPorJogador.json'
 // dica: o handler desta função é bem simples - basta passar para o template
 //       os dados do arquivo data/jogadores.json (~3 linhas)
 
+app.get('/', (request, response) => {
+    response.render('index', db);
+})
 
 
 // EXERCÍCIO 3
@@ -58,6 +64,3 @@ app.listen(PORT, () => {
     console.log('Escutando em: http://localhost:3000')
 })
 
-// app.get('/', (request, response) => {
-//     response.render('index');
-// })
